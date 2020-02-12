@@ -1,0 +1,6 @@
+module.exports = {
+  DELETE_POST: 'DELETE_POST',
+  EDIT_POST: 'EDIT_POST',
+  ADD_POST: 'ADD_POST',
+  GET_POSTS_LIST: 'GET_POSTS_LIST',
+};
