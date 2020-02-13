@@ -47,4 +47,22 @@ export const Backend = {
         return response;
       });
   },
+  getCommentsList() {
+    return axios
+      .get('comments', {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      })
+      .then(function(response) {
+        console.log('responseresponseresponseresponseresponse', response.data);
+        return response;
+      })
+      .catch(function(err) {
+        const response = err.response ? err.response.data : undefined;
+        console.log('errerrerrerrerrerr', err);
+        // handleRequestError(response);
+        return response;
+      });
+  },
 };

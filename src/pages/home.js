@@ -9,7 +9,14 @@ import {
   I18nManager,
 } from 'react-native';
 import {connect} from 'react-redux';
-import {getPostsList, editPost, deletePost} from '../action';
+import {
+  getPostsList,
+  getCommentsList,
+  editPost,
+  deletePost,
+  postPropChanged,
+  addPost,
+} from '../action';
 import {
   verticalScale,
   moderateScale,
@@ -19,10 +26,11 @@ import {
 } from '../utils/device-scaling';
 import Container from '../components/Container';
 import strings from '../strings';
-import ActionButton from 'react-native-action-button';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import ActionSheet from 'react-native-actionsheet';
 import RNRestart from 'react-native-restart'; // Import package from node modules
+import Modal from 'react-native-modal';
+import Input from '../components/Input';
+import Comment from '../components/Comment';
 
 class Home extends Component {
   constructor(props) {
@@ -32,18 +40,23 @@ class Home extends Component {
     this.changeLang = this.changeLang.bind(this);
 
     this.state = {
-      postId: null,
+      postObject: null,
+      visible: false,
+      edit: false,
     };
   }
 
   componentDidMount() {
     this.props.getPostsList();
+    this.props.getCommentsList();
   }
   deleteAndEdit(index) {
     if (index === 0) {
-      this.props.editPost(this.state.postId);
+      this.setState({visible: true, edit: true});
+      this.props.postPropChanged('title', this.state.postObject.title);
+      this.props.postPropChanged('body', this.state.postObject.body);
     } else if (index === 1) {
-      this.props.deletePost(this.state.postId);
+      this.props.deletePost(this.state.postObject.id);
     }
   }
   async changeLang(index) {
@@ -66,11 +79,12 @@ class Home extends Component {
   };
   renderItem({item}) {
     const {radioTextStyle, contentContainerStyle, moreIconStyle} = styles;
+    const {commentList} = this.props;
     return (
       <View style={contentContainerStyle}>
         <TouchableOpacity
           onPress={() => {
-            this.setState({postId: item.id});
+            this.setState({postObject: item});
             this.ActionSheet.show();
           }}
           activeOpacity={0.7}>
@@ -82,42 +96,79 @@ class Home extends Component {
         <Text style={radioTextStyle}>{item.id}</Text>
         <Text style={radioTextStyle}>{item.title}</Text>
         <Text style={radioTextStyle}>{item.body}</Text>
+        {/* {commentList.length>0?<Text>comments</Text>:null} */}
+        {commentList.map((comment, index) => {
+          if (comment.postId === item.id) return <Comment comment={comment} />;
+        })}
       </View>
     );
   }
+
+  hideModal() {
+    this.setState({visible: false});
+    this.props.postPropChanged('title', '');
+    this.props.postPropChanged('body', '');
+  }
+
   render() {
-    const {moreIconStyle, header, radioTextStyle, addPostButton} = styles;
+    const {
+      moreIconStyle,
+      header,
+      radioTextStyle,
+      addPostButton,
+      addPostContainerStyle,
+      addPostModalStyle,
+      addPostTextStyle,
+      addPostTitleStyle,
+      addPostTitleViewStyle,
+      addPostViewStyle,
+      modalStyle,
+      buttonContainerStyle,
+      cancelTextStyle,
+      TextInputStyle,
+      inputStyle,
+    } = styles;
     const options = [strings.edit, strings.delete, strings.cancel];
     const optionsLang = [strings.arabic, strings.english, strings.cancel];
 
-    const {postList, navigation} = this.props;
+    const {
+      postList,
+      title,
+      body,
+      postPropChanged,
+      addPost,
+      editPost,
+    } = this.props;
     return (
-      <KeyboardAwareScrollView>
-        <Container>
-          <View style={header}>
-            <TouchableOpacity
-              onPress={() => this.ActionSheetLang.show()}
-              style={addPostButton}
-              activeOpacity={0.7}>
-              <Image
-                source={require('../assets/icons/website.png')}
-                style={[moreIconStyle]}
-              />
-              <Text style={[radioTextStyle,{marginTop:0}]}>{strings.changeLang}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {}}
-              style={addPostButton}
-              activeOpacity={0.7}>
-              <Image
-                source={require('../assets/icons/plus.png')}
-                style={[moreIconStyle]}
-              />
-              <Text style={[radioTextStyle,{marginTop:0}]}>{strings.addPost}</Text>
-            </TouchableOpacity>
-          </View>
-          <FlatList data={postList} renderItem={this.renderItem} />
-        </Container>
+      <Container>
+        <View style={header}>
+          <TouchableOpacity
+            onPress={() => this.ActionSheetLang.show()}
+            style={addPostButton}
+            activeOpacity={0.7}>
+            <Image
+              source={require('../assets/icons/website.png')}
+              style={[moreIconStyle]}
+            />
+            <Text style={[radioTextStyle, {marginTop: 0}]}>
+              {strings.changeLang}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => this.setState({visible: true, edit: false})}
+            style={addPostButton}
+            activeOpacity={0.7}>
+            <Image
+              source={require('../assets/icons/plus.png')}
+              style={[moreIconStyle]}
+            />
+            <Text style={[radioTextStyle, {marginTop: 0}]}>
+              {strings.addPost}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <FlatList data={postList} renderItem={this.renderItem} />
+
         <ActionSheet
           ref={o => (this.ActionSheet = o)}
           // title={strings.changeLang}
@@ -128,13 +179,66 @@ class Home extends Component {
         />
         <ActionSheet
           ref={o => (this.ActionSheetLang = o)}
-          // title={strings.changeLang}
+          title={strings.changeLang}
           options={optionsLang}
           cancelButtonIndex={2}
-          // destructiveButtonIndex={I18nManager.isRTL ? 0 : 1}
+          destructiveButtonIndex={I18nManager.isRTL ? 0 : 1}
           onPress={index => this.changeLang(index)}
         />
-      </KeyboardAwareScrollView>
+
+        <Modal
+          isVisible={this.state.visible}
+          onBackButtonPress={() => this.setState({visible: false})}
+          onBackdropPress={() => this.setState({visible: false})}
+          // animationType="slide"
+          // transparent={true}
+          style={modalStyle}>
+          <View style={addPostModalStyle}>
+            <View style={addPostContainerStyle}>
+              <View style={addPostTitleViewStyle}>
+                <Text style={addPostTitleStyle}>{strings.addPost}</Text>
+              </View>
+              <Input
+                value={title}
+                placeholder={strings.title}
+                onChangeText={title => postPropChanged('title', title)}
+                returnKeyType={'done'}
+                containerStyle={TextInputStyle}
+                inputStyle={inputStyle}
+                // multiline={true}
+              />
+              <Input
+                value={body}
+                placeholder={strings.addPost}
+                onChangeText={body => postPropChanged('body', body)}
+                returnKeyType={'done'}
+                containerStyle={TextInputStyle}
+                inputStyle={inputStyle}
+                // multiline={true}
+              />
+
+              <View style={buttonContainerStyle}>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.setState({visible: false});
+                    this.state.edit
+                      ? editPost(this.state.postObject.id)
+                      : addPost();
+                  }}
+                  style={[addPostViewStyle, {backgroundColor: '#F0BC5E'}]}>
+                  <Text style={addPostTextStyle}>{strings.addPost}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => this.hideModal()}
+                  style={addPostViewStyle}>
+                  <Text style={cancelTextStyle}>{strings.cancel}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </Container>
     );
   }
 }
@@ -182,12 +286,76 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
   },
+
+  addPostViewStyle: {
+    width: width * 0.25,
+    height: height * 0.07,
+    borderRadius: scale(22),
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F7F7F7',
+    marginHorizontal: verticalScale(22),
+  },
+  addPostTextStyle: {
+    fontSize: moderateScale(33),
+    color: '#fff',
+  },
+  cancelTextStyle: {
+    fontSize: moderateScale(33),
+    color: '#000000',
+  },
+  buttonContainerStyle: {
+    flexDirection: 'row',
+    marginTop: verticalScale(44),
+  },
+  addPostTitleStyle: {
+    fontSize: moderateScale(55),
+    color: '#000000',
+  },
+  addPostTitleViewStyle: {
+    width: width * 0.5,
+    height: height * 0.04,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addPostContainerStyle: {
+    width: width * 0.9,
+    padding: scale(33),
+    backgroundColor: '#FFFFFF',
+    height: verticalScale(666),
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: scale(15),
+  },
+  addPostModalStyle: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalStyle: {
+    // width:width*.8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  TextInputStyle: {
+    marginVertical: scale(22),
+    width: width * 0.7,
+    borderRadius: scale(22),
+    height: height * 0.07,
+  },
+  inputStyle: {
+    fontSize: moderateScale(44),
+    color: '#F0BC5E',
+  },
 });
 
-const mapStateToProps = ({auth}) => {
-  const {postList} = auth;
+const mapStateToProps = ({post}) => {
+  const {postList, title, body, commentList} = post;
   return {
+    commentList,
     postList,
+    title,
+    body,
   };
 };
 
@@ -195,7 +363,10 @@ export default connect(
   mapStateToProps,
   {
     getPostsList,
+    getCommentsList,
     editPost,
     deletePost,
+    postPropChanged,
+    addPost,
   },
 )(Home);

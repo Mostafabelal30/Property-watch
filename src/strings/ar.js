@@ -19,4 +19,5 @@ export default (ar = {
   edit: 'تعديل',
   delete: 'حذف',
   addPost: 'أضف منشورا',
+  title: 'العنوان',
 });

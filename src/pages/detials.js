@@ -26,8 +26,8 @@ class Login extends Component {
 
 const styles = StyleSheet.create({});
 
-const mapStateToProps = ({auth}) => {
-  const {} = auth;
+const mapStateToProps = ({post}) => {
+  const {} = post;
   return {};
 };
 

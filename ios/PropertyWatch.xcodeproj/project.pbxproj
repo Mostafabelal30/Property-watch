@@ -161,7 +161,6 @@
 				6F2273EBFEDF0A99107B7ED2 /* Pods-PropertyWatchTests.debug.xcconfig */,
 				EBAFD949B860CC6498FD9F39 /* Pods-PropertyWatchTests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -308,6 +307,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);

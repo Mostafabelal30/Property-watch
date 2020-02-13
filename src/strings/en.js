@@ -16,4 +16,5 @@ export default (en = {
   edit: 'Edit',
   delete: 'Delete',
   addPost: 'add Post',
+  title: 'Title',
 });

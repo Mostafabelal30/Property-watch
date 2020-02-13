@@ -1,0 +1,20 @@
+export default (colors = {
+  white0: '#FFFFFF',
+  white1: '#F5F5F5',
+  white3: '#e2e2e2',
+  blue0: '#236EBE',
+  gray01: '#737373',
+  gray02: '#484848',
+  gray3: '#E6E6E6',
+  gray4: '#EFEFEF',
+  gray05: '#eeeeee',
+  blue1: '#32AEEF',
+  blue2: '#00B0F0',
+  blue3: '#55A0D4',
+  black0: '#403D3D',
+  black1: '#222222',
+  black2: '#3B3838',
+  green0: '#1C8520', // cool color
+  green1: '#6AC259',
+  yellow: '#E8B116',
+});
