@@ -1,9 +1,6 @@
 import React from 'react';
 import realm from '../realm';
 
-/**
- *
- */
 export default class Posts {
   static async save(Post) {
     return new Promise((resolve, reject) => {
@@ -52,6 +49,7 @@ export default class Posts {
         .catch(() => {});
     });
   }
+
   static async update(Post) {
     return new Promise((resolve, reject) => {
       console.log('UPDATING');

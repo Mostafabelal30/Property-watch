@@ -31,8 +31,7 @@ import RNRestart from 'react-native-restart'; // Import package from node module
 import Modal from 'react-native-modal';
 import Input from '../components/Input';
 import Comment from '../components/Comment';
-import Posts from '../db/models/Posts';
-import {getPosts, savePosts} from '../db/queries';
+import {changeAppLanguage} from '../utils/device-langauge';
 
 class Home extends Component {
   constructor(props) {
@@ -49,27 +48,10 @@ class Home extends Component {
   }
 
   componentDidMount() {
-    // Posts.allSync().then(courses => {
-    //   console.log('courses from query', courses);
-    // });
-    // let courses = Posts.allSync();
-    // console.log('componentDidMount', isConnected);
     this.props.getPostsList();
     this.props.getCommentsList();
-
-    // .then(() => Posts.save(this.props.postList))
-    // .catch(function(err) {
-    //   console.log('getPostsListgetPostsList', err.response);
-    //   return err;
-    // });
-    // let x = getPosts();
-
-    // getPosts().then(res => {
-    //   console.log('resresresresresres', res);
-    //   // Posts.save(this.props.postList);
-    // });
-    // console.log('courses from query', Array.from(courses));
   }
+
   deleteAndEdit(index) {
     if (index === 0) {
       this.setState({visible: true, edit: true});
@@ -79,24 +61,15 @@ class Home extends Component {
       this.props.deletePost(this.state.postObject.id);
     }
   }
+
   async changeLang(index) {
     if (index === 0 && !I18nManager.isRTL) {
-      I18nManager.allowRTL(true);
-      I18nManager.forceRTL(true);
-      this.restart();
-      // changeAppLanguage('ar');
+      changeAppLanguage('ar');
     } else if (index === 1 && I18nManager.isRTL) {
-      I18nManager.allowRTL(false);
-      I18nManager.forceRTL(false);
-      this.restart();
-      // changeAppLanguage('en');
+      changeAppLanguage('en');
     }
   }
-  restart = () => {
-    setTimeout(() => {
-      RNRestart.Restart();
-    }, 250);
-  };
+
   renderItem({item}) {
     const {radioTextStyle, contentContainerStyle, moreIconStyle} = styles;
     const {commentList} = this.props;
@@ -119,9 +92,6 @@ class Home extends Component {
         <Text style={radioTextStyle}>{item.id}</Text>
         <Text style={radioTextStyle}>{item.title}</Text>
         <Text style={radioTextStyle}>{item.body}</Text>
-        {/* {commentList.length>0?<Text>comments</Text>:null} */}
-        {/* {commentList.map((comment, index) => { */}
-        {/* if (comment.postId === item.id) return  */}
         {arr.length > 0 ? <Comment comment={arr[0]} /> : null}
       </View>
     );
@@ -194,10 +164,8 @@ class Home extends Component {
 
         <ActionSheet
           ref={o => (this.ActionSheet = o)}
-          // title={strings.changeLang}
           options={options}
           cancelButtonIndex={2}
-          // destructiveButtonIndex={I18nManager.isRTL ? 0 : 1}
           onPress={index => this.deleteAndEdit(index)}
         />
         <ActionSheet
@@ -213,13 +181,13 @@ class Home extends Component {
           isVisible={this.state.visible}
           onBackButtonPress={() => this.setState({visible: false})}
           onBackdropPress={() => this.setState({visible: false})}
-          // animationType="slide"
-          // transparent={true}
           style={modalStyle}>
           <View style={addPostModalStyle}>
             <View style={addPostContainerStyle}>
               <View style={addPostTitleViewStyle}>
-                <Text style={addPostTitleStyle}>{strings.addPost}</Text>
+                <Text style={addPostTitleStyle}>
+                  {this.state.edit ? strings.edit : strings.addPost}
+                </Text>
               </View>
               <Input
                 value={title}
@@ -228,7 +196,6 @@ class Home extends Component {
                 returnKeyType={'done'}
                 containerStyle={TextInputStyle}
                 inputStyle={inputStyle}
-                // multiline={true}
               />
               <Input
                 value={body}
@@ -237,7 +204,6 @@ class Home extends Component {
                 returnKeyType={'done'}
                 containerStyle={TextInputStyle}
                 inputStyle={inputStyle}
-                // multiline={true}
               />
 
               <View style={buttonContainerStyle}>
@@ -249,7 +215,9 @@ class Home extends Component {
                       : addPost();
                   }}
                   style={[addPostViewStyle, {backgroundColor: '#F0BC5E'}]}>
-                  <Text style={addPostTextStyle}>{strings.addPost}</Text>
+                  <Text style={addPostTextStyle}>
+                    {this.state.edit ? strings.edit : strings.addPost}
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -269,7 +237,6 @@ class Home extends Component {
 const styles = StyleSheet.create({
   contentContainerStyle: {
     width: width * 0.9,
-    // height: height * 0.25,
     marginVertical: width * 0.03,
     backgroundColor: '#fff',
   },
@@ -278,19 +245,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(30),
     textAlign: 'center',
     marginTop: verticalScale(20),
-  },
-  imageBackground: {
-    width: width * 0.3,
-    height: height * 0.2,
-  },
-  footer: {
-    width: width,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: verticalScale(77),
-    top: 700,
-    position: 'absolute',
-    backgroundColor: 'gray',
   },
   moreIconStyle: {
     width: width * 0.07,
@@ -309,7 +263,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
   },
-
   addPostViewStyle: {
     width: width * 0.25,
     height: height * 0.07,
@@ -356,7 +309,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modalStyle: {
-    // width:width*.8,
     alignItems: 'center',
     justifyContent: 'center',
   },
