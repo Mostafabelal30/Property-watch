@@ -24,7 +24,7 @@ export default (state = INIT_STATE, action) => {
         postList: [
           {
             userId: 1,
-            id: state.postList.length + 1,
+            id: state.postList[0].id + 1,
             title: state.title,
             body: state.body,
           },

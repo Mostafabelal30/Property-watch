@@ -1,4 +1,5 @@
 import {showMessage} from 'react-native-flash-message';
+import NetInfo from '@react-native-community/netinfo';
 
 export function errorMessage(message) {
   showMessage({
@@ -22,17 +23,8 @@ export function successMessage(message) {
   });
 }
 
-export function showCorrectPlateNumber(plateNumber) {
-  return (
-    plateNumber
-      .substring(0, 3)
-      .split('')
-      .join('') +
-    // ' ' +
-    plateNumber
-      .substring(3)
-      .split('')
-      .reverse()
-      .join('')
-  );
-}
+export const isConnected = async () => {
+  const asd = await NetInfo.fetch().then(state => state);
+  console.log('asdasd', asd);
+  return asd.isConnected;
+};

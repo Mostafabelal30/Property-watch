@@ -31,6 +31,8 @@ import RNRestart from 'react-native-restart'; // Import package from node module
 import Modal from 'react-native-modal';
 import Input from '../components/Input';
 import Comment from '../components/Comment';
+import Posts from '../db/models/Posts';
+import {getPosts, savePosts} from '../db/queries';
 
 class Home extends Component {
   constructor(props) {
@@ -47,8 +49,26 @@ class Home extends Component {
   }
 
   componentDidMount() {
+    // Posts.allSync().then(courses => {
+    //   console.log('courses from query', courses);
+    // });
+    // let courses = Posts.allSync();
+    // console.log('componentDidMount', isConnected);
     this.props.getPostsList();
     this.props.getCommentsList();
+
+    // .then(() => Posts.save(this.props.postList))
+    // .catch(function(err) {
+    //   console.log('getPostsListgetPostsList', err.response);
+    //   return err;
+    // });
+    // let x = getPosts();
+
+    // getPosts().then(res => {
+    //   console.log('resresresresresres', res);
+    //   // Posts.save(this.props.postList);
+    // });
+    // console.log('courses from query', Array.from(courses));
   }
   deleteAndEdit(index) {
     if (index === 0) {
@@ -80,6 +100,9 @@ class Home extends Component {
   renderItem({item}) {
     const {radioTextStyle, contentContainerStyle, moreIconStyle} = styles;
     const {commentList} = this.props;
+    const arr = commentList.filter(function(comment, i) {
+      return comment.postId === item.id;
+    });
     return (
       <View style={contentContainerStyle}>
         <TouchableOpacity
@@ -97,9 +120,9 @@ class Home extends Component {
         <Text style={radioTextStyle}>{item.title}</Text>
         <Text style={radioTextStyle}>{item.body}</Text>
         {/* {commentList.length>0?<Text>comments</Text>:null} */}
-        {commentList.map((comment, index) => {
-          if (comment.postId === item.id) return <Comment comment={comment} />;
-        })}
+        {/* {commentList.map((comment, index) => { */}
+        {/* if (comment.postId === item.id) return  */}
+        {arr.length > 0 ? <Comment comment={arr[0]} /> : null}
       </View>
     );
   }
