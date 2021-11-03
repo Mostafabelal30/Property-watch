@@ -32,7 +32,7 @@
     "realm": "^3.6.3",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
-    "validator": "^12.1.0"
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
